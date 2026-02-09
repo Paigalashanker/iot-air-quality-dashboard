@@ -425,12 +425,6 @@
             <div class="status-badge" id="connectionStatus">● Connecting...</div>
             <div class="status-badge" id="lastUpdated"
                 style="background: rgba(99, 102, 241, 0.2); margin-left: 0.5rem; display: none;">🕒 --:--:--</div>
-
-            <!-- Gemini API Key Input Removed -->
-            <!-- <div style="margin-top: 1rem;">
-                <input type="password" id="geminiApiKey" placeholder="Enter Gemini API Key" 
-                    style="display: none;">
-            </div> -->
         </header>
 
         <!-- Metrics Grid -->
@@ -573,7 +567,6 @@
         };
 
         let previousData = null;
-        let errorCount = 0;
 
         // ===== CHART CONFIGURATION =====
         const chartConfig = {
@@ -756,101 +749,6 @@
             humidityChart.update('none');
         }
 
-
-
-
-        async function analyzeWithGemini() {
-            const apiKey = document.getElementById('geminiApiKey').value;
-            const summaryElement = document.getElementById('aiSummary');
-            const btn = document.getElementById('analyzeBtn');
-
-            if (!apiKey) {
-                alert("Please enter a valid Gemini API Key.");
-                return;
-            }
-
-            // Show loading state
-            summaryElement.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> Analyzing data with Gemini...';
-            btn.disabled = true;
-            btn.style.opacity = 0.7;
-
-            // Prepare context data
-            const recentData = {
-                current: {
-                    aqi: dataHistory.aqi[dataHistory.aqi.length - 1],
-                    temperature: dataHistory.temperature[dataHistory.temperature.length - 1],
-                    humidity: dataHistory.humidity[dataHistory.humidity.length - 1],
-                    time: dataHistory.timestamps[dataHistory.timestamps.length - 1]
-                },
-                history_avg: {
-                    aqi: (dataHistory.aqi.reduce((a, b) => a + b, 0) / dataHistory.aqi.length).toFixed(1),
-                    temperature: (dataHistory.temperature.reduce((a, b) => a + b, 0) / dataHistory.temperature.length).toFixed(1),
-                    humidity: (dataHistory.humidity.reduce((a, b) => a + b, 0) / dataHistory.humidity.length).toFixed(1)
-                }
-            };
-
-            const prompt = `
-                You are an environmental expert AI. Analyze the following air quality data from an IoT sensor:
-                
-                Current Conditions:
-                - AQI: ${recentData.current.aqi}
-                - Temperature: ${recentData.current.temperature}°C
-                - Humidity: ${recentData.current.humidity}%
-                - Time: ${recentData.current.time}
-
-                Historical Average (Last 20 readings):
-                - Avg AQI: ${recentData.history_avg.aqi}
-                - Avg Temperature: ${recentData.history_avg.temperature}°C
-                - Avg Humidity: ${recentData.history_avg.humidity}%
-
-                Provide a concise, 2-3 sentence summary of the air quality, potential health impacts, and simple recommendations. 
-                Focus on the relationship between the metrics. Keep it friendly and actionable.
-            `;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: prompt
-                            }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-
-                const aiResponse = data.candidates[0].content.parts[0].text;
-
-                // Typewriter effect for response
-                let i = 0;
-                summaryElement.innerHTML = '';
-                const typeWriter = () => {
-                    if (i < aiResponse.length) {
-                        summaryElement.innerHTML += aiResponse.charAt(i);
-                        i++;
-                        setTimeout(typeWriter, 15); // Adjust speed here
-                    }
-                };
-                typeWriter();
-
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                summaryElement.innerHTML = `<span style="color: var(--color-poor);">Error: ${error.message}</span>`;
-            } finally {
-                btn.disabled = false;
-                btn.style.opacity = 1;
-            }
-        }
-
         function updateUI(data) {
             // Update AQI
             document.getElementById('aqiValue').textContent = data.aqi;
@@ -872,10 +770,6 @@
                 document.getElementById('rawValue').textContent = data.raw;
             }
 
-            // Update AI Summary (Only if NOT using Gemini mode - we keep the manual trigger for Gemini)
-            // const summary = generateAISummary(data);
-            // document.getElementById('aiSummary').textContent = summary;
-
             // Update connection status
             document.getElementById('connectionStatus').textContent = '● Live';
             document.getElementById('connectionStatus').style.background = 'rgba(16, 185, 129, 0.3)';
@@ -890,6 +784,7 @@
 
             document.getElementById('connectionStatus').textContent = '● Waiting for data...';
 
+            // 1. Listen for Live Data (Instant Updates)
             dataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
 
@@ -907,21 +802,23 @@
                         lastUpdatedEl.textContent = '🕒 ' + timeString;
                     }
 
-                    // Update data history
+                    // Update data history (local cache for immediate feedback)
                     updateDataHistory(data);
 
                     // Update UI
                     updateUI(data);
 
-                    // Update charts
+                    // Update charts (temporarily using local data until history loads)
                     updateCharts();
                 }
+            }, (error) => {
                 console.error("Firebase Error:", error);
                 document.getElementById('connectionStatus').textContent = '● Connection Error';
                 document.getElementById('connectionStatus').style.background = 'rgba(239, 68, 68, 0.3)';
             });
 
-            // Listen for data history (Last 50 points)
+
+            // 2. Listen for Historical Data (for Charts)
             // This replaces client-side history array for charts
             const historyRef = db.ref('sensor/history').limitToLast(50);
             historyRef.on('value', (snapshot) => {
@@ -946,7 +843,7 @@
                 updateCharts();
             });
 
-            // Listen for AI Summary from Backend
+            // 3. Listen for AI Summary from Backend
             const aiRef = db.ref('analysis/latest');
             aiRef.on('value', (snapshot) => {
                 const data = snapshot.val();
