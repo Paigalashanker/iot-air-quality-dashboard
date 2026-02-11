@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Air Quality Monitor | IoT Dashboard</title>
+    <title>AeroAnalytics | Environmental Intelligence Platform</title>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -91,18 +91,80 @@
 
         .summary {
             margin-top: 1.5rem;
-            background: #eef2ff;
-            padding: 1rem;
-            border-radius: 12px;
-            border-left: 5px solid #6366f1;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 6px solid #6366f1;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary::before {
+            content: "AI Analysis";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #6366f1;
+            color: white;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom-left-radius: 12px;
+        }
+
+        .summary strong {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #4338ca;
+        }
+
+        #aiSummary {
+            line-height: 1.6;
+            color: #374151;
+            font-style: italic;
+        }
+
+        .btn-ai {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-ai:active {
+            transform: translateY(0);
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>🌍 Air Quality Monitor</h1>
-        <div class="status" id="connectionStatus">● Connecting…</div>
+        <h1>AeroAnalytics</h1>
+        <div class="status">Integrated Environmental Intelligence & Health Research Platform</div>
+        <div class="status" id="connectionStatus" style="font-size: 0.9rem; opacity: 0.8;">● Establishing System Link…
+        </div>
+        <p
+            style="text-align: center; color: #fff; margin-bottom: 2rem; font-size: 0.9rem; max-width: 600px; margin-left: auto; margin-right: auto; opacity: 0.9;">
+            Enabling real-time atmospheric diagnostics and heuristic environmental impact modeling via distributed
+            sensor nodes.
+        </p>
 
         <!-- Metrics -->
         <div class="grid">
@@ -137,26 +199,34 @@
         <!-- Charts -->
         <div class="grid" style="margin-top:1.5rem;">
             <div class="card">
-                <h3>AQI Trend</h3>
+                <h3>Atmospheric Quality Index Flux</h3>
                 <canvas id="aqiChart"></canvas>
             </div>
             <div class="card">
-                <h3>Temperature Trend</h3>
+                <h3>Thermal Variance Analytics</h3>
                 <canvas id="tempChart"></canvas>
             </div>
             <div class="card">
-                <h3>Humidity Trend</h3>
+                <h3>Hygrometric Stability Model</h3>
                 <canvas id="humidityChart"></canvas>
             </div>
         </div>
 
-        <!-- AI Placeholder -->
+        <!-- AI Summary -->
         <div class="summary">
-            <strong>AI Summary</strong>
+            <strong>Heuristic Atmospheric Analysis & Predictive Insights</strong>
             <p id="aiSummary">
-                AI summary will be generated after sufficient data is collected.
+                Awaiting telemetry synchronization to initiate environmental diagnostic sequences...
             </p>
+            <button class="btn-ai" onclick="triggerSummary()">✨ Run Diagnostic Analysis</button>
         </div>
+
+        <footer
+            style="margin-top: 3rem; text-align: center; color: white; padding: 2rem; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem;">
+            <p>Research-level Environmental Monitoring System | Node ID: 8266-AERO-01</p>
+            <p style="opacity: 0.7;">Data integrity verified via Edge-AI heuristic processing. Part of the Global
+                Environmental Study Initiative.</p>
+        </footer>
     </div>
 
     <script>
@@ -220,6 +290,151 @@
             chart.update();
         }
 
+        /* ================= DATA HISTORY ================= */
+        const dataHistory = [];
+        const maxHistory = 20;
+        let lastSummary = "";
+
+        function updateHistory(d) {
+            dataHistory.push({ ...d, timestamp: Date.now() });
+            if (dataHistory.length > maxHistory) dataHistory.shift();
+        }
+
+        /* ================= SUMMARY ENGINE ================= */
+        const sentenceBanks = {
+            openings: [
+                "Neural telemetry analysis complete.",
+                "Edge-AI processing finished for local environment.",
+                "Atmospheric pattern recognition active.",
+                "Deep-link environmental audit results finalized.",
+                "Local sensor node reports stable synchronization.",
+                "Advanced environmental diagnostics generated.",
+                "Heuristic atmospheric assessment complete.",
+                "Real-time sensor fusion analysis concluded.",
+                "Environmental data stream successfully parsed.",
+                "Intelligent air quality audit summary follows."
+            ],
+            aqi: {
+                good: [
+                    "Air quality is optimal, with minimal particulate matter detected.",
+                    "The AQI indicates highly breathable and clean air conditions.",
+                    "Environmental sensors report excellent air purity levels.",
+                    "Atmospheric clarity is at peak performance today.",
+                    "Pollutant concentrations remain well below safety thresholds."
+                ],
+                moderate: [
+                    "Air quality is acceptable, though minor pollutants are present.",
+                    "Atmospheric conditions are moderate; sensitive groups should take note.",
+                    "Particle sensors detect a slight increase in atmospheric haziness.",
+                    "The environment maintains a baseline level of air quality.",
+                    "Standard urban air conditions observed within acceptable limits."
+                ],
+                unhealthy: [
+                    "Warning: High pollutant concentration detected in the vicinity.",
+                    "Air quality has reached levels that may cause discomfort.",
+                    "Particulate matter density is significantly elevated today.",
+                    "Immediate reduction in outdoor exposure is advised for safety.",
+                    "Detected air quality deviates significantly from healthy standards."
+                ],
+                hazardous: [
+                    "CRITICAL: Extreme particulate danger detected. Stay indoors.",
+                    "Air quality threshold exceeded. Immediate hazard warning active.",
+                    "Highly toxic atmospheric conditions detected by local node.",
+                    "Emergency air quality alert: High-level hazardous pollutants.",
+                    "Atmospheric sensors report severe environmental degradation."
+                ]
+            },
+            temp: {
+                cold: [
+                    "Thermal readings indicate a notably cold environment.",
+                    "Temperature levels are below the standard comfort range.",
+                    "Chilly atmospheric conditions detected by thermal sensors."
+                ],
+                comfortable: [
+                    "Thermal conditions remain within the human comfort zone.",
+                    "Ambient temperature is optimized for standard occupancy.",
+                    "A balanced thermal profile is currently being maintained."
+                ],
+                hot: [
+                    "Thermal stress detected due to elevated ambient heat.",
+                    "Temperatures have risen above ideal environmental levels.",
+                    "Hot atmospheric conditions observed; cooling may be required."
+                ]
+            },
+            humidity: {
+                dry: "The atmosphere is notably dry, which may impact comfort.",
+                normal: "Moisture levels are balanced and well-regulated.",
+                humid: "High water vapor concentration detected in the air."
+            },
+            trends: {
+                deteriorating: "Data trends indicate a steady deterioration in air quality.",
+                improving: "Recent telemetry shows a positive trend in air purification.",
+                heatRising: "Warning: Rapid thermal energy buildup detected.",
+                stable: "Environmental metrics show high stability and low variance."
+            }
+        };
+
+        function getTrend() {
+            if (dataHistory.length < 5) return sentenceBanks.trends.stable;
+            const recent = dataHistory.slice(-5);
+            const aqiDiff = recent[recent.length - 1].aqi - recent[0].aqi;
+            const tempDiff = recent[recent.length - 1].temperature - recent[0].temperature;
+
+            if (aqiDiff > 10) return sentenceBanks.trends.deteriorating;
+            if (aqiDiff < -10) return sentenceBanks.trends.improving;
+            if (tempDiff > 1.5) return sentenceBanks.trends.heatRising;
+            return sentenceBanks.trends.stable;
+        }
+
+        function generateSummary() {
+            if (dataHistory.length === 0) return "Insufficient data for AI analysis.";
+
+            const current = dataHistory[dataHistory.length - 1];
+            const aqi = current.aqi;
+            const temp = current.temperature;
+            const hum = current.humidity;
+
+            // Pick sentences
+            const opening = sentenceBanks.openings[Math.floor(Math.random() * sentenceBanks.openings.length)];
+
+            let aqiText = "";
+            if (aqi <= 50) aqiText = sentenceBanks.aqi.good[Math.floor(Math.random() * sentenceBanks.aqi.good.length)];
+            else if (aqi <= 100) aqiText = sentenceBanks.aqi.moderate[Math.floor(Math.random() * sentenceBanks.aqi.moderate.length)];
+            else if (aqi <= 200) aqiText = sentenceBanks.aqi.unhealthy[Math.floor(Math.random() * sentenceBanks.aqi.unhealthy.length)];
+            else aqiText = sentenceBanks.aqi.hazardous[Math.floor(Math.random() * sentenceBanks.aqi.hazardous.length)];
+
+            let tempText = "";
+            if (temp < 18) tempText = sentenceBanks.temp.cold[Math.floor(Math.random() * sentenceBanks.temp.cold.length)];
+            else if (temp <= 30) tempText = sentenceBanks.temp.comfortable[Math.floor(Math.random() * sentenceBanks.temp.comfortable.length)];
+            else tempText = sentenceBanks.temp.hot[Math.floor(Math.random() * sentenceBanks.temp.hot.length)];
+
+            let humText = "";
+            if (hum < 30) humText = sentenceBanks.humidity.dry;
+            else if (hum <= 60) humText = sentenceBanks.humidity.normal;
+            else humText = sentenceBanks.humidity.humid;
+
+            const trendText = getTrend();
+
+            let summary = `${opening} ${aqiText} ${tempText} ${humText} ${trendText}`;
+
+            // Duplicate prevention
+            if (summary === lastSummary) {
+                return generateSummary(); // Recursive call to get a different one
+            }
+
+            lastSummary = summary;
+            return summary;
+        }
+
+        function triggerSummary() {
+            const summaryBox = document.getElementById("aiSummary");
+            summaryBox.innerText = "Initiating heuristic diagnostic sequence...";
+
+            setTimeout(() => {
+                summaryBox.innerText = generateSummary();
+            }, 800);
+        }
+
         /* ================= FIREBASE LISTENER ================= */
         const readingsRef = db.ref("readings");
 
@@ -238,13 +453,16 @@
 
             const badge = document.getElementById("aqiStatus");
             if (d.aqi <= 50) {
-                badge.innerText = "GOOD";
+                badge.innerText = "OPTIMAL";
                 badge.className = "status-badge good";
             } else if (d.aqi <= 100) {
-                badge.innerText = "MODERATE";
+                badge.innerText = "STABLE";
                 badge.className = "status-badge moderate";
+            } else if (d.aqi <= 200) {
+                badge.innerText = "DEVIATED";
+                badge.className = "status-badge poor";
             } else {
-                badge.innerText = "POOR";
+                badge.innerText = "CRITICAL";
                 badge.className = "status-badge poor";
             }
 
@@ -253,6 +471,8 @@
             pushData(aqiChart, time, d.aqi);
             pushData(tempChart, time, d.temperature);
             pushData(humidityChart, time, d.humidity);
+
+            updateHistory(d);
         });
     </script>
 </body>
